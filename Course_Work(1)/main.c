@@ -41,6 +41,58 @@ bmp_picsel **createPictureMemory(uint32_t height, uint32_t width) {
   return new_picture;
 }
 
+//Получение размеров кусков
+uint32_t *getPieces(uint32_t length, unsigned int number) {
+  if (length < number)
+    return NULL;
+  uint32_t len = length;
+  uint32_t *pieces = calloc(number, sizeof(uint32_t));
+  if (pieces) {
+    for (int i = 0; i < number - 1; i++) {
+      pieces[i] = length / number;
+      len -= pieces[i];
+    }
+    pieces[number - 1] = len;
+  }
+  return pieces;
+}
+
+//Деление картинки на части
+int cutIntoPieces(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp **picture, unsigned int x_cut, unsigned int y_cut) {
+  BITMAPFILEHEADER *bfh_array;
+  BITMAPINFOHEADER *bih_array;
+  uint32_t *x_pieces, *y_pieces;
+  bmp_picsel ***cutted_pictures;
+  unsigned int count = x_cut * y_cut;
+
+  bfh_array = calloc(count, sizeof(BITMAPFILEHEADER));
+  bih_array = calloc(count, sizeof(BITMAPINFOHEADER));
+  x_pieces = getPieces(bih.Width, x_cut);
+  y_pieces = getPieces(bih.Height, y_cut);
+  cutted_pictures = calloc(count, sizeof(bmp_picsel **));
+  if (!(bfh_array && bih_array && x_pieces && y_pieces && cutted_pictures)) {
+    printf("NotEnoughMemoryError\n");
+    return 0;
+  }
+  for (int i = 0; i < count;)
+    for (int j = 0; j < y_cut; j++)
+      for (int k = 0; k < x_cut; k++)
+	if (!(cutted_pictures[i++] = createPictureMemory(y_pieces[j], x_pieces[k]))) {
+	  printf("NotEnoughMemoryError\n");
+	  return 0;
+	}
+  for (int i = 0; i < count; i++)
+    bfh_array[i] = bfh;
+  for (int i = 0; i < count; i++) {
+    bih_array[i] = bih;
+    bih_array[i].biWidth = x_pieces[i % x_cut];
+    bih_array[i].biHeight = y_pieces[i / y_cut];
+  }
+   
+
+
+}
+
 int main() {
   BITMAPFILEHEADER bfh;
   BITMAPINFOHEADER bih;
@@ -82,18 +134,18 @@ int main() {
   }
   printf("Reading picture: done\n");
   //Работа первой функции
-  bmp_picsel *newPicsel = createNewPicsel(255, 0, 0);
+  /* bmp_picsel *newPicsel = createNewPicsel(255, 0, 0);
   changeColour(bih, picture, picture[300][200], *newPicsel);
   bmp_picsel *newPicsel1 = createNewPicsel(0, 255, 0);
-  changeColour(bih, picture, picture[300][300], *newPicsel1);
+  changeColour(bih, picture, picture[300][300], *newPicsel1); */
   //Работа второй функции
-  if (colourFilter(bih, picture, "red", 0) == 0) {
+  if (colourFilter(bih, picture, "green", 200) == 0) {
     printf("FilterError\n");
     freePicture(picture, bih.biHeight);
     fclose(file);
     return 0;
   }
-  if (colourFilter(bih, picture, "green", 0) == 0) {
+  if (colourFilter(bih, picture, "blue", 225) == 0) {
     printf("FilterError\n");
     freePicture(picture, bih.biHeight);
     fclose(file);
