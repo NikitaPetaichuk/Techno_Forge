@@ -1,6 +1,5 @@
 #include "BMP_Picsel.h"
 
-//Создание нового пикселя
 bmp_picsel *createNewPicsel(uint8_t blue, uint8_t green, uint8_t red) {
   bmp_picsel *newOne = malloc(sizeof(bmp_picsel));
   newOne->blue = blue;
@@ -9,14 +8,12 @@ bmp_picsel *createNewPicsel(uint8_t blue, uint8_t green, uint8_t red) {
   return newOne;
 }
 
-//Перезапись пикселя другим пикселем
 void rewritePicsel(bmp_picsel *old, bmp_picsel *new) {
   old->blue = new->blue;
   old->green = new->green;
   old->red = new->red;
 }
 
-//Проверка идентичности пикселей
 int picselsAreEqual(bmp_picsel one, bmp_picsel two) {
   if (one.red == two.red)
     if (one.green == two.green)
@@ -25,7 +22,6 @@ int picselsAreEqual(bmp_picsel one, bmp_picsel two) {
   return 0;
 }
 
-//Замена определённого бита
 int changeComponent(bmp_picsel *picsel, char *colour, uint8_t intensive) {
   char *colours[] = { "blue", "green", "red" };
   int flag = -1;
