@@ -83,7 +83,7 @@ int main() {
       printf("OK\n");
     printf("Number of elements: %d\n", count(qu));
   }
-  printf("--------------------\n"); 
+/*  printf("--------------------\n"); 
   printf("Working with ten elements\n");
   for (int i = 1; i < QUEUE_SIZE + 2; i++) {
     printf("%d)I'm trying to put %c into queue.\n", i, 'a' + i - 1);
@@ -97,7 +97,7 @@ int main() {
     if (now != 0)
       printf("OK\n");
     printf("Number of elements: %d\n", count(qu));
-  } 
+  } */
   if (isEmpty)
     printf("Function \"isEmpty\" feels good.\n");
   finalize(qu);
