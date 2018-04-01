@@ -62,6 +62,7 @@ char **getPictureNames(uint32_t number) {
     }
     free(index_buffer);
   }
+  free(indexes);
   return names;
 }
 
@@ -96,10 +97,11 @@ void copyPicturePiece(bmp_picsel **from, bmp_picsel **destination, uint32_t x_fr
   }
 }
 
-void writeIntoFile(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp_picsel **picture, char *name) {
+int writeIntoFile(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp_picsel **picture, char *name) {
   FILE *new_file;
 
-  new_file = fopen(name, "wb+");
+  if (!(new_file = fopen(name, "wb+")))
+    return 0;
   fwrite(&bfh, sizeof(bfh), 1, new_file);
   fwrite(&bih, sizeof(bih), 1, new_file);
   for (int i = bih.biHeight - 1; i >= 0; i--) {
@@ -107,6 +109,7 @@ void writeIntoFile(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp_picsel **pict
     fseek(new_file, (3 * bih.biWidth) % 4, SEEK_CUR);
   }
   fclose(new_file);
+  return 1;
 }
 
 void changeColour(BITMAPINFOHEADER bih, bmp_picsel **picture, bmp_picsel oldColour, bmp_picsel newColour) {
@@ -177,4 +180,3 @@ int cutIntoPieces(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp_picsel **pictu
   free(y_pieces);
   return 1;
 }
-
