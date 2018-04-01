@@ -26,7 +26,6 @@ int main() {
   //Чтение картинки
   for (int i = bih.biHeight - 1; i >= 0; i--) {
     if (fread(picture[i], sizeof(bmp_picsel), bih.biWidth, file) != bih.biWidth) {
-      printf("PictureReadingError\n");
       freePicture(picture, bih.biHeight);
       fclose(file);
       return 0;
@@ -36,7 +35,11 @@ int main() {
   //Работа третьей функции
   cutIntoPieces(bfh, bih, picture, 2, 2); //Некорректная работа
   //Копирование картинки в отдельный файл
-  writeIntoFile(bfh, bih, picture, "result.bmp");
+  if (!writeIntoFile(bfh, bih, picture, "result.bmp")) {
+    freePicture(picture, bih.biHeight);
+    fclose(file);
+    return 0;
+  }
   freePicture(picture, bih.biHeight);
   fclose(file);
   return 0;
