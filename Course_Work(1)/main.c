@@ -35,11 +35,7 @@ int main() {
   //Работа третьей функции
   cutIntoPieces(bfh, bih, picture, 2, 2); //Некорректная работа
   //Копирование картинки в отдельный файл
-  if (!writeIntoFile(bfh, bih, picture, "result.bmp")) {
-    freePicture(picture, bih.biHeight);
-    fclose(file);
-    return 0;
-  }
+  writeIntoFile(bfh, bih, picture, "result.bmp");
   freePicture(picture, bih.biHeight);
   fclose(file);
   return 0;
