@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define STRING_SIZE 50
 #define QUEUE_SIZE 10
 #define ERROR_DEQ 0
 
@@ -58,8 +59,13 @@ void finalize(queue *q) {
 
 void showInfo(queue *q) {
   printf("\n----Queue Information----\n");
-  printf("Number of elements: %d.\n", count(q));
-  printf("Top element: '%c'.\n", top(q));
+  if (isEmpty(q)) {
+    printf("The queue is empty.\n");
+  }
+  else {
+    printf("Number of elements: %d.\n", count(q));
+    printf("Top element: '%c'.\n", top(q));
+  }
   printf("-------------------------\n\n");
 }
 
@@ -69,21 +75,21 @@ void intro(queue **q, char **string) {
   printf("This version is specialized on the cyclical array-based queue, which size is %d.\n\n", QUEUE_SIZE);
 
   initQueue(q, QUEUE_SIZE);
-  *string = malloc(QUEUE_SIZE * sizeof(char)); 
+  *string = malloc(STRING_SIZE * sizeof(char)); 
 }
 
 void instruction_1(queue **q, char *string) {
   int count = 0;
 
-  printf("Write a string and press Enter.\n");
-  fgets(string, 100, stdin);
+  printf("Write a string and press Enter (max size of the string is %d).\n", STRING_SIZE);
+  fgets(string, STRING_SIZE, stdin);
   if (strstr(string, "\n"))
     string[strlen(string) - 1] = '\0';
   for (int i = 0; string[i]; i++) {
     enq(q, string[i]);
     count++;
   }
-  printf("You added %d elements.\n", count);
+  printf("You've added %d elements.\n", count);
   showInfo(*q);
 }
 
@@ -97,7 +103,7 @@ void instruction_2(queue **q) {
       break;
     count++;
   }
-  printf("You deleted %d elements.\n", count);
+  printf("You've deleted %d elements.\n", count);
   showInfo(*q);
 }
 
