@@ -57,6 +57,11 @@ void finalize(queue *q) {
   free(q);
 }
 
+void print_queue(queue *q) {
+  for (int i = q->deqloc, j = 0; j < q->now_size; i = (i + 1) % q->max_size, j++)
+    printf("%c", q->array[i]);
+}
+
 void showInfo(queue *q) {
   printf("\n----Queue Information----\n");
   if (isEmpty(q)) {
@@ -65,6 +70,9 @@ void showInfo(queue *q) {
   else {
     printf("Number of elements: %d.\n", count(q));
     printf("Top element: '%c'.\n", top(q));
+    printf("Elements: ");
+    print_queue(q);
+    printf("\n");
   }
   printf("-------------------------\n\n");
 }
@@ -98,12 +106,15 @@ void instruction_2(queue **q) {
 
   printf("Write the number of elements you want do delete: ");
   scanf("%d", &number);
+  printf("Removed elements: ");
   for (int i = 0; i < number; i++) {
-    if (deq(q) == ERROR_DEQ)
+    char now = deq(q);
+    if (now == ERROR_DEQ)
       break;
+    printf("%c", now);
     count++;
   }
-  printf("You've deleted %d elements.\n", count);
+  printf("\nYou've deleted %d elements.\n", count);
   showInfo(*q);
 }
 
