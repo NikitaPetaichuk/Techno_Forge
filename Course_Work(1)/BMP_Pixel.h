@@ -3,20 +3,20 @@
 #include <string.h>
 
 //Структура пикселя
-typedef struct BMP_Picsel {
+typedef struct BMP_Pixel {
     uint8_t blue;
     uint8_t green;
     uint8_t red;
-} bmp_picsel;
+} bmp_pixel;
 
 //Создание нового пикселя
-bmp_picsel* createNewPicsel(uint8_t blue, uint8_t green, uint8_t red);
+bmp_pixel* createNewPixel(uint8_t blue, uint8_t green, uint8_t red);
 
 //Перезапись пикселя другим пикселем
-void rewritePicsel(bmp_picsel* old, bmp_picsel* new);
+void rewritePixel(bmp_pixel* old, bmp_pixel* new);
 
 //Проверка идентичности пикселей
-int picselsAreEqual(bmp_picsel one, bmp_picsel two);
+int pixelsAreEqual(bmp_pixel one, bmp_pixel two);
 
 //Замена определённого бита
-int changeComponent(bmp_picsel *picsel, char *colour, uint8_t intensive);
+int changeComponent(bmp_pixel *picsel, char *colour, uint8_t intensive);

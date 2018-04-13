@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "BMP_Headers.h"
-#include "BMP_Picsel.h"
+#include "BMP_Pixel.h"
 
 #define BUFFER_SIZE 20
 
@@ -14,23 +14,23 @@ void itoa(int n, char *s);
 char **getPictureNames(uint32_t number);
 
 //Функция выделения памяти под двумерный массив пикселей
-bmp_picsel **createPictureMemory(uint32_t height, uint32_t width);
+bmp_pixel **createPictureMemory(uint32_t height, uint32_t width);
 
 //Функция освобождения памяти для двумерного массива пикселей
-void freePicture(bmp_picsel **array, int lineNumber);
+void freePicture(bmp_pixel **array, int lineNumber);
 
 //Копирование области картинки
-void copyPicturePiece(bmp_picsel **from, bmp_picsel **destination, uint32_t x_from, uint32_t y_from,
+void copyPicturePiece(bmp_pixel **from, bmp_pixel **destination, uint32_t x_from, uint32_t y_from,
                       uint32_t x_length, uint32_t y_length);
 
 //Запись картинки в отдельный файл
-void writeIntoFile(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp_picsel **picture, char *name);
+void writeIntoFile(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp_pixel **picture, char *name);
 
 //Замена цвета
-void changeColour(BITMAPINFOHEADER bih, bmp_picsel **picture, bmp_picsel oldColour, bmp_picsel newColour);
+void changeColour(BITMAPINFOHEADER bih, bmp_pixel **picture, bmp_pixel oldColour, bmp_pixel newColour);
 
 //Фильтрация по определённому цвету
-int colourFilter(BITMAPINFOHEADER bih, bmp_picsel **picture, char *colour, uint8_t intensive);
+int colourFilter(BITMAPINFOHEADER bih, bmp_pixel **picture, char *colour, uint8_t intensive);
 
 //Деление картинки на части и запись частей в отдельные файлы (необходима доработка)
-int cutIntoPieces(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp_picsel **picture, uint32_t x_cut, uint32_t y_cut);
+int cutIntoPieces(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp_pixel **picture, uint32_t x_cut, uint32_t y_cut);

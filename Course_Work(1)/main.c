@@ -4,7 +4,7 @@ int main() {
   BITMAPFILEHEADER bfh;
   BITMAPINFOHEADER bih;
   FILE *file;
-  bmp_picsel **picture;
+  bmp_pixel **picture;
 
   //Проверка корректного вызова программы и ввода bmp-заголовочников
   if (!(file = fopen("original.bmp", "rb"))) {
@@ -25,7 +25,7 @@ int main() {
   }
   //Чтение картинки
   for (int i = bih.biHeight - 1; i >= 0; i--) {
-    if (fread(picture[i], sizeof(bmp_picsel), bih.biWidth, file) != bih.biWidth) {
+    if (fread(picture[i], sizeof(bmp_pixel), bih.biWidth, file) != bih.biWidth) {
       freePicture(picture, bih.biHeight);
       fclose(file);
       return 0;

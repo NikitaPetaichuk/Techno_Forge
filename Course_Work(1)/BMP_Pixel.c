@@ -1,20 +1,20 @@
-#include "BMP_Picsel.h"
+#include "BMP_Pixel.h"
 
-bmp_picsel *createNewPicsel(uint8_t blue, uint8_t green, uint8_t red) {
-  bmp_picsel *newOne = malloc(sizeof(bmp_picsel));
+bmp_pixel *createNewPixel(uint8_t blue, uint8_t green, uint8_t red) {
+  bmp_pixel *newOne = malloc(sizeof(bmp_pixel));
   newOne->blue = blue;
   newOne->green = green;
   newOne->red = red;
   return newOne;
 }
 
-void rewritePicsel(bmp_picsel *old, bmp_picsel *new) {
+void rewritePixel(bmp_pixel *old, bmp_pixel *new) {
   old->blue = new->blue;
   old->green = new->green;
   old->red = new->red;
 }
 
-int picselsAreEqual(bmp_picsel one, bmp_picsel two) {
+int pixelsAreEqual(bmp_pixel one, bmp_pixel two) {
   if (one.red == two.red)
     if (one.green == two.green)
       if (one.blue == two.blue)
@@ -22,7 +22,7 @@ int picselsAreEqual(bmp_picsel one, bmp_picsel two) {
   return 0;
 }
 
-int changeComponent(bmp_picsel *picsel, char *colour, uint8_t intensive) {
+int changeComponent(bmp_pixel *pixel, char *colour, uint8_t intensive) {
   char *colours[] = { "blue", "green", "red" };
   int flag = -1;
 
@@ -33,15 +33,15 @@ int changeComponent(bmp_picsel *picsel, char *colour, uint8_t intensive) {
     return 0;
   switch (flag) {
     case 0: {
-      picsel->blue = intensive;
+      pixel->blue = intensive;
       break;
     }
     case 1: {
-      picsel->green = intensive;
+      pixel->green = intensive;
       break;
     }
     case 2: {
-      picsel->red = intensive;
+      pixel->red = intensive;
       break;
     }
   }
