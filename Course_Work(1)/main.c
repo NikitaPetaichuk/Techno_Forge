@@ -1,42 +1,40 @@
 #include "BMP_Picture.h"
 
 int main() {
-  BITMAPFILEHEADER bfh;
-  BITMAPINFOHEADER bih;
   FILE *file;
-  bmp_pixel **picture;
+  bmp_picture picture;
 
   //Проверка корректного вызова программы и ввода bmp-заголовочников
   if (!(file = fopen("original.bmp", "rb"))) {
     return 0;
   }
-  if (fread(&bfh, sizeof(bfh), 1, file) != 1) {
+  if (fread(&picture.bfh, sizeof(picture.bfh), 1, file) != 1) {
     fclose(file);
     return 0;
   }
-  if (fread(&bih, sizeof(bih), 1, file) != 1) {
+  if (fread(&picture.bih, sizeof(picture.bih), 1, file) != 1) {
     fclose(file);
     return 0;
   }
   //Выделение памяти под картинку
-  if (!(picture = createPictureMemory(bih.biHeight, bih.biWidth))) {
+  if (!(picture.bitmap = createPictureMemory(picture.bih.biHeight, picture.bih.biWidth))) {
     fclose(file);
     return 0;
   }
   //Чтение картинки
-  for (int i = bih.biHeight - 1; i >= 0; i--) {
-    if (fread(picture[i], sizeof(bmp_pixel), bih.biWidth, file) != bih.biWidth) {
-      freePicture(picture, bih.biHeight);
+  for (int i = picture.bih.biHeight - 1; i >= 0; i--) {
+    if (fread(picture.bitmap[i], sizeof(bmp_pixel), picture.bih.biWidth, file) != picture.bih.biWidth) {
+      freePicture(picture.bitmap, picture.bih.biHeight);
       fclose(file);
       return 0;
     }
-    fseek(file, (3 * bih.biWidth) % 4, SEEK_CUR);
+    fseek(file, (4 - (3 * picture.bih.biWidth) % 4) % 4, SEEK_CUR);
   }
   //Работа третьей функции
-  cutIntoPieces(bfh, bih, picture, 2, 2); //Некорректная работа
+  cutIntoPieces(picture, 3, 3); //Некорректная работа
   //Копирование картинки в отдельный файл
-  writeIntoFile(bfh, bih, picture, "result.bmp");
-  freePicture(picture, bih.biHeight);
+  writeIntoFile(picture, "result.bmp");
+  freePicture(picture.bitmap, picture.bih.biHeight);
   fclose(file);
   return 0;
 }

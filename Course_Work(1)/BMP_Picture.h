@@ -4,6 +4,12 @@
 
 #define BUFFER_SIZE 20
 
+typedef struct BMP_Picture {
+  BITMAPFILEHEADER bfh;
+  BITMAPINFOHEADER bih;
+  bmp_pixel **bitmap;
+} bmp_picture;
+
 //Получение размеров кусков
 uint32_t *getPieces(uint32_t length, unsigned int number);
 
@@ -24,13 +30,13 @@ void copyPicturePiece(bmp_pixel **from, bmp_pixel **destination, uint32_t x_from
                       uint32_t x_length, uint32_t y_length);
 
 //Запись картинки в отдельный файл
-void writeIntoFile(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp_pixel **picture, char *name);
+void writeIntoFile(bmp_picture picture, char *name);
 
 //Замена цвета
-void changeColour(BITMAPINFOHEADER bih, bmp_pixel **picture, bmp_pixel oldColour, bmp_pixel newColour);
+void changeColour(bmp_picture picture, bmp_pixel oldColour, bmp_pixel newColour);
 
 //Фильтрация по определённому цвету
-int colourFilter(BITMAPINFOHEADER bih, bmp_pixel **picture, char *colour, uint8_t intensive);
+int colourFilter(bmp_picture picture, char *colour, uint8_t intensive);
 
 //Деление картинки на части и запись частей в отдельные файлы (необходима доработка)
-int cutIntoPieces(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih, bmp_pixel **picture, uint32_t x_cut, uint32_t y_cut);
+int cutIntoPieces(bmp_picture picture, uint32_t x_cut, uint32_t y_cut);
