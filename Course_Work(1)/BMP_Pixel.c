@@ -22,15 +22,13 @@ int pixelsAreEqual(bmp_pixel one, bmp_pixel two) {
   return 0;
 }
 
-int changeComponent(bmp_pixel *pixel, char *colour, uint8_t intensive) {
+void changeComponent(bmp_pixel *pixel, char *colour, uint8_t intensive) {
   char *colours[] = { "blue", "green", "red" };
   int flag = -1;
 
   for (int i = 0; i < 3; i++)
     if (strcmp(colours[i], colour) == 0)
       flag = i;
-  if (flag == -1)
-    return 0;
   switch (flag) {
     case 0: {
       pixel->blue = intensive;
@@ -45,5 +43,5 @@ int changeComponent(bmp_pixel *pixel, char *colour, uint8_t intensive) {
       break;
     }
   }
-  return 1;
+  return;
 }

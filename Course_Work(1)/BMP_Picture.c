@@ -71,8 +71,7 @@ bmp_pixel **createPictureMemory(uint32_t height, uint32_t width) {
   if (!(new_picture = calloc(height, sizeof(bmp_pixel*))))
     return NULL;
   for (uint32_t i = 0; i < height; i++) {
-    uint32_t size = width * 3 + (4 - (3 * width) % 4) % 4;
-    if (!(new_picture[i] = calloc(size, sizeof(bmp_pixel)))) {
+    if (!(new_picture[i] = calloc(width, sizeof(bmp_pixel)))) {
       freePicture(new_picture, i);
       return NULL;
     }
@@ -106,7 +105,8 @@ void writeIntoFile(bmp_picture picture, char *name) {
   fwrite(&picture.bih, sizeof(picture.bih), 1, new_file);
   for (int i = picture.bih.biHeight - 1; i >= 0; i--) {
     fwrite(picture.bitmap[i], sizeof(bmp_pixel), picture.bih.biWidth, new_file);
-    fseek(new_file, (4 - (3 * picture.bih.biWidth) % 4) % 4, SEEK_CUR);
+    int buff = 0;
+    fwrite(&buff, 1, (4 - (3 * picture.bih.biWidth) % 4) % 4, new_file);
   }
   fclose(new_file);
 }
@@ -116,14 +116,14 @@ void changeColour(bmp_picture picture, bmp_pixel oldColour, bmp_pixel newColour)
     for (int j = 0; j < picture.bih.biWidth; j++)
       if (pixelsAreEqual(picture.bitmap[i][j], oldColour))
         rewritePixel(&picture.bitmap[i][j], &newColour);
+  return;
 }
 
-int colourFilter(bmp_picture picture, char *colour, uint8_t intensive) {
+void colourFilter(bmp_picture picture, char *colour, uint8_t intensive) {
   for (int i = 0; i < picture.bih.biHeight; i++)
     for (int j = 0; j < picture.bih.biWidth; j++)
-      if (changeComponent(&picture.bitmap[i][j], colour, intensive) == 0)
-        return 0;
-  return 1;
+      changeComponent(&picture.bitmap[i][j], colour, intensive);
+  return;
 }           
 
 int cutIntoPieces(bmp_picture picture, uint32_t x_cut, uint32_t y_cut) {

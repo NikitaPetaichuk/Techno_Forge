@@ -36,7 +36,7 @@ void writeIntoFile(bmp_picture picture, char *name);
 void changeColour(bmp_picture picture, bmp_pixel oldColour, bmp_pixel newColour);
 
 //Фильтрация по определённому цвету
-int colourFilter(bmp_picture picture, char *colour, uint8_t intensive);
+void colourFilter(bmp_picture picture, char *colour, uint8_t intensive);
 
 //Деление картинки на части и запись частей в отдельные файлы (необходима доработка)
 int cutIntoPieces(bmp_picture picture, uint32_t x_cut, uint32_t y_cut);
