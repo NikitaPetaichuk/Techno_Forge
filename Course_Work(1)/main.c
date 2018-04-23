@@ -9,13 +9,13 @@ typedef struct Request {
   int need_to_cut;
 } request;
 
-static const char *optString = "rf:c";
+static const char *opt_string = "rf:c";
 
 static const struct option long_opts[] = {
-  {"rewrite", no_argument, NULL, 'r'},
-  {"filter", required_argument, NULL, 'f'},
-  {"cut", no_argument, NULL, 'c'},
-  {NULL, no_argument, NULL, 0}
+  {"rewrite", no_argument, 0, 'r'},
+  {"filter", required_argument, 0, 'f'},
+  {"cut", no_argument, 0, 'c'},
+  {0, 0, 0, 0}
 };
   
 
@@ -23,12 +23,12 @@ int main(int argc, char **argv) {
   FILE *file;
   bmp_picture picture;
   request instruction = {0, 0, NULL, 0};
-  int option, longIndex;
+  int option, opt_index = 0;
 
   //Обработка входных аргументов
   if (strstr(argv[argc - 1], ".bmp") == NULL)
     return 0;
-  while ((option = getopt_long(argc, argv, optString, long_opts, &longIndex)) != -1) {
+  while ((option = getopt_long(argc, argv, opt_string, long_opts, &opt_index)) != -1) {
     switch (option) {
       case 'r': {
         instruction.need_to_rewrite = 1;
@@ -47,6 +47,7 @@ int main(int argc, char **argv) {
         return 0;
       }
     }
+    opt_index = 0;
   }
   if (instruction.need_to_filter) {
     if (strcmp(instruction.which_component, "red") != 0 &&
@@ -55,7 +56,6 @@ int main(int argc, char **argv) {
       return 0;
     }
   }
-  puts("3");
   //Открытие файла и ввод bmp-заголовочников
   if (!(file = fopen(argv[argc - 1], "rb"))) {
     return 0;
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
   }
   if (instruction.need_to_filter) {
     int intensive, check;
-    printf("Write the intensive of your colour filter:\n");
+    printf("Write the intensive of your %s filter:\n", instruction.which_component);
     check = scanf("%d", &intensive);
     if (check != 1) {
       freePicture(picture.bitmap, picture.bih.biHeight);
