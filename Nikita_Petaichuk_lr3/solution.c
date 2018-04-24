@@ -34,7 +34,7 @@ int compFileData(const void *a, const void *b) {
     return -1;
 }
 
-void readData(char *filename, filedata **array, int *pcount, int *pmax) {
+void readData(char *filename, filedata **array, int *pcount) {
   char digit[STRING_SIZE] = {0};
   FILE *file = fopen(filename, "r");
   int i;
@@ -50,7 +50,7 @@ void readData(char *filename, filedata **array, int *pcount, int *pmax) {
   return;
 }
 
-void goThroughDirs(char *root, filedata **array, int *pcount, int *pmax) {
+void goThroughDirs(char *root, filedata **array, int *pcount) {
   char *next = calloc(STRING_SIZE, sizeof(char));
   strncpy(next, root, STRING_SIZE);
   DIR *dir = opendir(root);
@@ -63,14 +63,14 @@ void goThroughDirs(char *root, filedata **array, int *pcount, int *pmax) {
       int len = strlen(next);
       strcat(next, "/");
       strcat(next, now->d_name);
-      goThroughDirs(next, array, pcount, pmax);
+      goThroughDirs(next, array, pcount);
       next[len] = '\0';
     }
     if(now->d_type == DT_REG && isCorrectFile(now->d_name)) {
       int len = strlen(next);
       strcat(next, "/");
       strcat(next, now->d_name);
-      readData(next, array, pcount, pmax);
+      readData(next, array, pcount);
       next[len] = '\0';
     }
     now = readdir(dir);
