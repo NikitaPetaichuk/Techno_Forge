@@ -32,6 +32,9 @@ void copyPicturePiece(bmp_pixel **from, bmp_pixel **destination, uint32_t x_from
 //Запись картинки в отдельный файл
 void writeIntoFile(bmp_picture picture, char *name);
 
+//Функция чтения картинки
+bmp_picture *readPicture(char *filename);
+
 //Замена цвета
 void changeColour(bmp_picture picture, bmp_pixel oldColour, bmp_pixel newColour);
 

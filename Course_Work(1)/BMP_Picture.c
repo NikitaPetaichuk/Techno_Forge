@@ -1,10 +1,9 @@
 #include "BMP_Picture.h"
 
 uint32_t *getPieces(uint32_t length, unsigned int number) {
-  if (length < number)
-    return NULL;
   uint32_t len = length;
   uint32_t *pieces = calloc(number, sizeof(uint32_t));
+
   if (pieces) {
     for (int i = 0; i < number - 1; i++) {
       pieces[i] = length / number;
@@ -66,6 +65,12 @@ char **getPictureNames(uint32_t number) {
   return names;
 }
 
+void freePicture(bmp_pixel **array, int lineNumber) {
+  for (int i = 0; i < lineNumber; i++)
+    free(array[i]);
+  free(array);
+}
+
 bmp_pixel **createPictureMemory(uint32_t height, uint32_t width) {
   bmp_pixel **new_picture;
   if (!(new_picture = calloc(height, sizeof(bmp_pixel*))))
@@ -79,18 +84,13 @@ bmp_pixel **createPictureMemory(uint32_t height, uint32_t width) {
   return new_picture;
 }
 
-void freePicture(bmp_pixel **array, int lineNumber) {
-  for (int i = 0; i < lineNumber; i++)
-    free(array[i]);
-  free(array);
-}
-
 void copyPicturePiece(bmp_pixel **from, bmp_pixel **destination, uint32_t x_from, uint32_t y_from,
                       uint32_t x_length, uint32_t y_length) {
   uint32_t x = 0, y = 0;
   for (uint32_t i = y_from; i < y_length; i++) {
-    for (uint32_t j = x_from; j < x_length; j++)
+    for (uint32_t j = x_from; j < x_length; j++) {
       rewritePixel(&destination[y][x++], &from[i][j]);
+    }
     x = 0;
     y++;
   }
@@ -101,14 +101,58 @@ void writeIntoFile(bmp_picture picture, char *name) {
 
   if (!(new_file = fopen(name, "wb+")))
     return;
-  fwrite(&picture.bfh, sizeof(picture.bfh), 1, new_file);
-  fwrite(&picture.bih, sizeof(picture.bih), 1, new_file);
+  if (fwrite(&picture.bfh, sizeof(picture.bfh), 1, new_file) != 1) {
+    fclose(new_file);
+    return;
+  }
+  if (fwrite(&picture.bih, sizeof(picture.bih), 1, new_file) != 1) {
+    fclose(new_file);
+    return;
+  }
   for (int i = picture.bih.biHeight - 1; i >= 0; i--) {
-    fwrite(picture.bitmap[i], sizeof(bmp_pixel), picture.bih.biWidth, new_file);
+    for (int j = 0; j < picture.bih.biWidth; j++) {
+      fwrite(&picture.bitmap[i][j], sizeof(bmp_pixel), 1, new_file);
+    }
     int buff = 0;
-    fwrite(&buff, 1, (4 - (3 * picture.bih.biWidth) % 4) % 4, new_file);
+    fwrite(&buff, 1, picture.bih.biWidth % 4, new_file);
   }
   fclose(new_file);
+}
+
+bmp_picture *readPicture(char *filename) {
+  FILE *file = fopen(filename, "rb");
+  bmp_picture *new = malloc(sizeof(bmp_picture));
+
+  if (!file) {
+    free(new);
+    return NULL;
+  }
+  if (fread(&(new->bfh), sizeof(new->bfh), 1, file) != 1) {
+    fclose(file);
+    free(new);
+    return NULL;
+  }
+  if (fread(&(new->bih), sizeof(new->bih), 1, file) != 1) {
+    fclose(file);
+    free(new);
+    return NULL;
+  }
+  if (!(new->bitmap = createPictureMemory(new->bih.biHeight, new->bih.biWidth))) {
+    fclose(file);
+    free(new);
+    return NULL;
+  }
+  for (int i = new->bih.biHeight - 1; i >= 0; i--) {
+    if (fread(new->bitmap[i], sizeof(bmp_pixel), new->bih.biWidth, file) != new->bih.biWidth) {
+      fclose(file);
+      freePicture(new->bitmap, new->bih.biHeight);
+      free(new);
+      return NULL;
+    }
+    fseek(file, new->bih.biWidth % 4, SEEK_CUR);
+  }
+  fclose(file);
+  return new;
 }
 
 void changeColour(bmp_picture picture, bmp_pixel oldColour, bmp_pixel newColour) {
@@ -119,47 +163,88 @@ void changeColour(bmp_picture picture, bmp_pixel oldColour, bmp_pixel newColour)
   return;
 }
 
-void colourFilter(bmp_picture picture, char *colour, uint8_t intensive) {
+void colourFilter(bmp_picture picture, char *colour, uint8_t intensity) {
   for (int i = 0; i < picture.bih.biHeight; i++)
     for (int j = 0; j < picture.bih.biWidth; j++)
-      changeComponent(&picture.bitmap[i][j], colour, intensive);
+      changeComponent(&picture.bitmap[i][j], colour, intensity);
   return;
 }           
 
 int cutIntoPieces(bmp_picture picture, uint32_t x_cut, uint32_t y_cut) {
-  bmp_picture *cutted_pictures;
+  bmp_picture *cutted_pieces;
   uint32_t *x_pieces, *y_pieces;
   char **names;
-  uint32_t count = x_cut * y_cut;
+  uint32_t count = x_cut * y_cut, now_index = 0;
 
-  x_pieces = getPieces(picture.bih.biWidth, x_cut);
-  y_pieces = getPieces(picture.bih.biHeight, y_cut);
-  cutted_pictures = calloc(count, sizeof(bmp_picture));
-  names = getPictureNames(count);
-  for (uint32_t i = 0; i < count; i++)
-    if (!(cutted_pictures[i].bitmap = createPictureMemory(y_pieces[i / y_cut], x_pieces[i % x_cut]))) {
-      printf("NotEnoughMemoryError\n");
-      return 0;
-    }
-  for (uint32_t i = 0; i < count; i++) {
-    cutted_pictures[i].bfh = picture.bfh;
-    cutted_pictures[i].bfh.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + 
-                          x_pieces[i % x_cut] * y_pieces[i / y_cut] * sizeof(bmp_pixel);
-    cutted_pictures[i].bih = picture.bih;
-    cutted_pictures[i].bih.biWidth = x_pieces[i % x_cut];
-    cutted_pictures[i].bih.biHeight = y_pieces[i / y_cut];
+  if (!(x_pieces = getPieces(picture.bih.biWidth, x_cut)))
+    return 0;
+  if (!(y_pieces = getPieces(picture.bih.biHeight, y_cut))) {
+    free(x_pieces);
+    return 0;
   }
-  for (uint32_t i = 0; i < y_cut; i++)
-    for (uint32_t j = 0; j < x_cut; j++)
-      copyPicturePiece(picture.bitmap, cutted_pictures[i++].bitmap, j * (picture.bih.biWidth / x_cut),
-                       i * (picture.bih.biHeight / y_cut), x_pieces[j], y_pieces[i]);
-  for (uint32_t i = 0; i < count; i++)
-    writeIntoFile(cutted_pictures[i], names[i]);
-  for (uint32_t i = 0; i < count; i++)
-    freePicture(cutted_pictures[i].bitmap, y_pieces[i / y_cut]);
-  for (uint32_t i = 0; i < count; i++)
-    free(names[i]);
-  free(cutted_pictures);
+  if (!(names = getPictureNames(count))) {
+    free(x_pieces);
+    free(y_pieces);
+    return 0;
+  }
+  if (!(cutted_pieces = calloc(count, sizeof(bmp_picture)))) {
+    free(x_pieces);
+    free(y_pieces);
+    for (uint32_t t = 0; t < count; t++)
+      free(names[t]);
+    free(names);
+    return 0;
+  }
+  for (uint32_t j = 0; j < y_cut; j++) {
+    for (uint32_t k = 0; k < x_cut; k++) {
+      if (!(cutted_pieces[now_index++].bitmap = createPictureMemory(y_pieces[j], x_pieces[k]))) {
+        int t = 0;
+        for (uint32_t j1 = 0; j1 < y_cut; j1++) {
+          for (uint32_t k1 = 0; k1 < x_cut; k1++) {
+            if (t = now_index - 1) {
+              free(x_pieces);
+              free(y_pieces);
+              for (uint32_t t = 0; t < count; t++)
+                free(names[t]);
+              free(names);
+              free(cutted_pieces);
+              return 0;              
+            }
+            freePicture(cutted_pieces[t++].bitmap, y_pieces[j1]);
+          }
+        }
+      }
+    }
+  }
+  now_index = 0;
+  uint32_t now_y = 0, now_x = 0;
+  for (uint32_t j = 0; j < y_cut; j++) {
+    for (uint32_t k = 0; k < x_cut; k++) {
+      cutted_pieces[now_index].bfh = picture.bfh;
+      cutted_pieces[now_index].bfh.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + 
+                          x_pieces[k] * y_pieces[j] * sizeof(bmp_pixel);
+      cutted_pieces[now_index].bih = picture.bih;
+      cutted_pieces[now_index].bih.biWidth = x_pieces[k];
+      cutted_pieces[now_index].bih.biHeight = y_pieces[j];
+      copyPicturePiece(picture.bitmap, cutted_pieces[now_index].bitmap, now_x, now_y,
+                      x_pieces[k], y_pieces[j]);
+      now_x += x_pieces[k];
+      now_index++;
+    }
+    now_x = 0;
+    now_y += y_pieces[j];
+  }
+  now_index = 0;
+  for (uint32_t t = 0; t < count; t++)
+    writeIntoFile(cutted_pieces[t], names[t]);
+  for (uint32_t j = 0; j < y_cut; j++) {
+    for (uint32_t k = 0; k < x_cut; k++) {
+      freePicture(cutted_pieces[now_index++].bitmap, y_pieces[j]);
+    }
+  }
+  free(cutted_pieces);
+  for (uint32_t t = 0; t < count; t++)
+    free(names[t]);
   free(names);
   free(x_pieces);
   free(y_pieces);
