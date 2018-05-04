@@ -19,4 +19,7 @@ void rewritePixel(bmp_pixel* old, bmp_pixel* new);
 int pixelsAreEqual(bmp_pixel one, bmp_pixel two);
 
 //Замена определённого бита
-void changeComponent(bmp_pixel *picsel, char *colour, uint8_t intensive);
+void changeComponent(bmp_pixel *pixel, char *colour, uint8_t intensive);
+
+//Негатив-версия пикселя
+void setToNegative(bmp_pixel *pixel);

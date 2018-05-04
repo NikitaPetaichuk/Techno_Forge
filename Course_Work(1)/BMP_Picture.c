@@ -77,6 +77,7 @@ bmp_pixel **createPictureMemory(uint32_t height, uint32_t width) {
     return NULL;
   for (uint32_t i = 0; i < height; i++) {
     if (!(new_picture[i] = calloc(width, sizeof(bmp_pixel)))) {
+      printf("Not enough memory for the picture.\n");
       freePicture(new_picture, i);
       return NULL;
     }
@@ -87,8 +88,8 @@ bmp_pixel **createPictureMemory(uint32_t height, uint32_t width) {
 void copyPicturePiece(bmp_pixel **from, bmp_pixel **destination, uint32_t x_from, uint32_t y_from,
                       uint32_t x_length, uint32_t y_length) {
   uint32_t x = 0, y = 0;
-  for (uint32_t i = y_from; i < y_length; i++) {
-    for (uint32_t j = x_from; j < x_length; j++) {
+  for (uint32_t i = y_from; i < y_from + y_length; i++) {
+    for (uint32_t j = x_from; j < x_from + x_length; j++) {
       rewritePixel(&destination[y][x++], &from[i][j]);
     }
     x = 0;
@@ -99,22 +100,34 @@ void copyPicturePiece(bmp_pixel **from, bmp_pixel **destination, uint32_t x_from
 void writeIntoFile(bmp_picture picture, char *name) {
   FILE *new_file;
 
-  if (!(new_file = fopen(name, "wb+")))
+  if (!(new_file = fopen(name, "wb+"))) {
+    printf("File opening error (file - \"%s\").\n", name);
     return;
+  }
   if (fwrite(&picture.bfh, sizeof(picture.bfh), 1, new_file) != 1) {
+    printf("File writing error (file - \"%s\").\n", name);
     fclose(new_file);
     return;
   }
   if (fwrite(&picture.bih, sizeof(picture.bih), 1, new_file) != 1) {
+    printf("File writing error (file - \"%s\").\n", name);
     fclose(new_file);
     return;
   }
   for (int i = picture.bih.biHeight - 1; i >= 0; i--) {
     for (int j = 0; j < picture.bih.biWidth; j++) {
-      fwrite(&picture.bitmap[i][j], sizeof(bmp_pixel), 1, new_file);
+      if (fwrite(&picture.bitmap[i][j], sizeof(bmp_pixel), 1, new_file) != 1) {
+        printf("File writing error (file - \"%s\").\n", name);
+        fclose(new_file);
+        return;
+      }
     }
     int buff = 0;
-    fwrite(&buff, 1, picture.bih.biWidth % 4, new_file);
+    if (fwrite(&buff, 1, picture.bih.biWidth % 4, new_file) != picture.bih.biWidth % 4) {
+      printf("File writing error (file - \"%s\").\n", name);
+      fclose(new_file);
+      return;
+    }
   }
   fclose(new_file);
 }
@@ -124,15 +137,18 @@ bmp_picture *readPicture(char *filename) {
   bmp_picture *new = malloc(sizeof(bmp_picture));
 
   if (!file) {
+    printf("File opening error (file - \"%s\").\n", filename);
     free(new);
     return NULL;
   }
   if (fread(&(new->bfh), sizeof(new->bfh), 1, file) != 1) {
+    printf("File reading error (file - \"%s\").\n", filename);
     fclose(file);
     free(new);
     return NULL;
   }
   if (fread(&(new->bih), sizeof(new->bih), 1, file) != 1) {
+    printf("File reading error (file - \"%s\").\n", filename);
     fclose(file);
     free(new);
     return NULL;
@@ -144,6 +160,7 @@ bmp_picture *readPicture(char *filename) {
   }
   for (int i = new->bih.biHeight - 1; i >= 0; i--) {
     if (fread(new->bitmap[i], sizeof(bmp_pixel), new->bih.biWidth, file) != new->bih.biWidth) {
+      printf("File reading error (file - \"%s\").\n", filename);
       fclose(file);
       freePicture(new->bitmap, new->bih.biHeight);
       free(new);
@@ -168,7 +185,14 @@ void colourFilter(bmp_picture picture, char *colour, uint8_t intensity) {
     for (int j = 0; j < picture.bih.biWidth; j++)
       changeComponent(&picture.bitmap[i][j], colour, intensity);
   return;
-}           
+}
+
+void NegativeFilter(bmp_picture picture) {
+  for (int i = 0; i < picture.bih.biHeight; i++)
+    for (int j = 0; j < picture.bih.biWidth; j++)
+      setToNegative(&picture.bitmap[i][j]);
+  return;
+}       
 
 int cutIntoPieces(bmp_picture picture, uint32_t x_cut, uint32_t y_cut) {
   bmp_picture *cutted_pieces;
@@ -176,18 +200,23 @@ int cutIntoPieces(bmp_picture picture, uint32_t x_cut, uint32_t y_cut) {
   char **names;
   uint32_t count = x_cut * y_cut, now_index = 0;
 
-  if (!(x_pieces = getPieces(picture.bih.biWidth, x_cut)))
+  if (!(x_pieces = getPieces(picture.bih.biWidth, x_cut))) {
+    printf("Not enough memory for the pieces length storage (per width).\n"); 
     return 0;
+  }
   if (!(y_pieces = getPieces(picture.bih.biHeight, y_cut))) {
+    printf("Not enough memory for the pieces length storage (per height).\n");
     free(x_pieces);
     return 0;
   }
   if (!(names = getPictureNames(count))) {
+    printf("Not enough memory for the file names storage.\n");
     free(x_pieces);
     free(y_pieces);
     return 0;
   }
   if (!(cutted_pieces = calloc(count, sizeof(bmp_picture)))) {
+    printf("Not enuogh memory for the pieces pictures storage.\n");
     free(x_pieces);
     free(y_pieces);
     for (uint32_t t = 0; t < count; t++)

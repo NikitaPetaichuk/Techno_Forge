@@ -12,16 +12,23 @@ typedef struct Configs {
   char *cutting_fs;
 } configs;
 
+//Проверка на корректность бита
 int isCorrectByte(int byte);
 
+//Проверка на корректность координаты
 int isCorrectCoordinate(int coord, int max);
 
+//Проверка на корректность формата аргумента 
 int isCorrectFormat(char *string, char *reg_exp);
 
-int startInterface(int argc, char **argv, configs *inst);
+//Справка
+void printHelpMessage();
 
+//Функция-интерфейс для переписывания пикселей
 int rewriteInterface(bmp_picture picture, configs inst);
 
+//Функция-интерфейс для фильтрации
 int filterInterface(bmp_picture picture, configs inst);
 
+//Функция-интерфейс для деления на части
 int cutInterface(bmp_picture picture, configs inst);

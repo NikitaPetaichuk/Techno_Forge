@@ -16,34 +16,20 @@ int isCorrectFormat(char *string, char *reg_exp) {
   return regexec(&reg_comp, string, 0, NULL, 0);
 }
 
-int startInterface(int argc, char **argv, configs *inst) {
-  int option, opt_index, count = 0;
-  char *opt_string = "r:f:c:";
-  struct option long_opts[] = {
-    {"rewrite", required_argument, NULL, 'r'},
-    {"filter", required_argument, NULL, 'f'},
-    {"cut", required_argument, NULL, 'c'},
-    {NULL, 0, NULL, 0}
-  };
-
-  inst->queue = calloc(QUEUE_SIZE, sizeof(char));
-  while ((option = getopt_long(argc, argv, opt_string, long_opts, &opt_index)) != -1) {
-    switch (option) {
-      case 'r':
-        inst->queue[count++] = option;
-        inst->rewrite_fs = optarg;
-        break;
-      case 'f':
-        inst->queue[count++] = option;
-        inst->filter_fs = optarg;
-        break;
-      case 'c':
-        inst->queue[count++] = option;
-        inst->cutting_fs = optarg;
-        break;
-    }
-  }
-  return count;
+void printHelpMessage() {
+  printf("\033[1m*** BMPSHOP ***\n\n");
+  printf("USAGE:\n\n");
+  printf("\t\033[0m./bmpshop flags_with_arguments <filename>.bmp\n\n");
+  printf("\033[1mFLAGS:\n\n");
+  printf("\t\033[0m1) -r (--rewrite); argument format: \"x-y:r-g-b\" - change colour, which belongs to the pixel with coordinates (x, y) from\n"); 
+  printf("\t                                                  the upper left corner, to the new one with red component 'r', green\n");
+  printf("\t                                                  component 'g' and blue component 'b' (from 0 to 255);\n");
+  printf("\t2) -f (--filter); argument format: \"comp:inten\" - change every pixel's component 'comp' ('red', 'blue' or 'green') to the new\n");
+  printf("\t                                                  value 'inten' (from 0 t0 255)\n");
+  printf("\t3) -c (--cut); argument format: \"x:y\" - cut picture into x * y pieces (x per picture width, y per picture height).\n");
+  printf("\t                                        Evevy piece goes to the new file with the name \"piece_#N.bmp\"\n");
+  printf("\t4) -n (--negative); no argument - Use negative filter to the picture.\n");
+  printf("\033[1mRemember!\033[0m The sequence of flags is important (first flag instruction will be done first).\n");
 }
 
 int rewriteInterface(bmp_picture picture, configs inst) {
@@ -52,7 +38,7 @@ int rewriteInterface(bmp_picture picture, configs inst) {
   int size[2] = {(int) picture.bih.biWidth, (int) picture.bih.biHeight};
 
   if(isCorrectFormat(inst.rewrite_fs, "[[:digit:]]+-[[:digit:]]+:[[:digit:]]+-[[:digit:]]+-[[:digit:]]+")) {
-    printf("wrong\n");
+    printf("Wrong argument format for rewriting.\n");
     return 0;
   }
   args[0] = atoi(strtok(inst.rewrite_fs, "-:"));
@@ -60,12 +46,16 @@ int rewriteInterface(bmp_picture picture, configs inst) {
     args[i] = atoi(strtok(NULL, "-:"));
   for (int i = 0; i < 5; i++) {
     if (i < 2) {
-      if (!isCorrectCoordinate(args[i], size[i]))
+      if (!isCorrectCoordinate(args[i], size[i])) {
+        printf("Incorrect coordinate: must be from 0 to %d.\n", size[i] - 1);
         return 0;
+      }
     }
     else {
-      if (!isCorrectByte(args[i]))
+      if (!isCorrectByte(args[i])) {
+        printf("Incorrect intensity: must be from 0 to 255.\n");
         return 0;
+      }
     }
   }
   old = &picture.bitmap[args[1]][args[0]];
@@ -80,17 +70,21 @@ int filterInterface(bmp_picture picture, configs inst) {
   char *colour;
 
   if(isCorrectFormat(inst.filter_fs, "[[:alpha:]]+:[[:digit:]]+")) {
-    printf("wrong\n");
+    printf("Wrong argument format for filtrating.\n");
     return 0;
   }
   colour = strtok(inst.filter_fs, ":");
   intensity = atoi(strtok(NULL, ":"));
   if (strcmp(colour, "red") != 0 &&
       strcmp(colour, "green") != 0 &&
-      strcmp(colour, "blue") != 0) 
+      strcmp(colour, "blue") != 0) {
+    printf("Unknown colour component.\n");
     return 0;
-  if (!isCorrectByte(intensity))
+  }
+  if (!isCorrectByte(intensity)) {
+    printf("Incorrect intensity: must be from 0 to 255.\n");
     return 0;
+  }
   colourFilter(picture, colour, (uint8_t) intensity);
   return 1;
 }
@@ -99,15 +93,19 @@ int cutInterface(bmp_picture picture, configs inst) {
   int perX, perY;
 
   if(isCorrectFormat(inst.cutting_fs, "[[:digit:]]+:[[:digit:]]+")) {
-    printf("wrong\n");
+    printf("Wrong argument format for cutting.\n");
     return 0;
   }
   perX = atoi(strtok(inst.cutting_fs, ":"));
   perY = atoi(strtok(NULL, ":"));
-  if (perX <= 0 || perY <= 0)
+  if (perX <= 0 || perY <= 0) {
+    printf("Incorrect division: division by zero or by negative number.\n");
     return 0;
-  else if (perX > picture.bih.biWidth || perY > picture.bih.biHeight)
+  }
+  else if (perX > picture.bih.biWidth || perY > picture.bih.biHeight) {
+    printf("Too strong division: number of pixels is not enough for the such division.\n"); 
     return 0;
+  }
   cutIntoPieces(picture, (uint32_t) perX, (uint32_t) perY);
   return 1;
 }

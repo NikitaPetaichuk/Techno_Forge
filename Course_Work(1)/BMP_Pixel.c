@@ -45,3 +45,9 @@ void changeComponent(bmp_pixel *pixel, char *colour, uint8_t intensity) {
   }
   return;
 }
+
+void setToNegative(bmp_pixel *pixel) {
+  pixel->blue = 255 - pixel->blue;
+  pixel->green = 255 - pixel->green;
+  pixel->red = 255 - pixel->red;
+}
