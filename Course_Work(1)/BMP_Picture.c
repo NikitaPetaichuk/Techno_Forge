@@ -73,11 +73,13 @@ void freePicture(bmp_pixel **array, int lineNumber) {
 
 bmp_pixel **createPictureMemory(uint32_t height, uint32_t width) {
   bmp_pixel **new_picture;
-  if (!(new_picture = calloc(height, sizeof(bmp_pixel*))))
+  if (!(new_picture = calloc(height, sizeof(bmp_pixel*)))) {
+    printf("Not enough memory to continue operating with picture.\n");
     return NULL;
+  }
   for (uint32_t i = 0; i < height; i++) {
     if (!(new_picture[i] = calloc(width, sizeof(bmp_pixel)))) {
-      printf("Not enough memory for the picture.\n");
+      printf("Not enough memory to continue operating with picture.\n");
       freePicture(new_picture, i);
       return NULL;
     }
@@ -105,26 +107,26 @@ void writeIntoFile(bmp_picture picture, char *name) {
     return;
   }
   if (fwrite(&picture.bfh, sizeof(picture.bfh), 1, new_file) != 1) {
-    printf("File writing error (file - \"%s\").\n", name);
+    printf("Writing BITMAPFILEHEADER error (file - \"%s\").\n", name);
     fclose(new_file);
     return;
   }
   if (fwrite(&picture.bih, sizeof(picture.bih), 1, new_file) != 1) {
-    printf("File writing error (file - \"%s\").\n", name);
+    printf("Writing BITMAPINFOHEADER error (file - \"%s\").\n", name);
     fclose(new_file);
     return;
   }
   for (int i = picture.bih.biHeight - 1; i >= 0; i--) {
     for (int j = 0; j < picture.bih.biWidth; j++) {
       if (fwrite(&picture.bitmap[i][j], sizeof(bmp_pixel), 1, new_file) != 1) {
-        printf("File writing error (file - \"%s\").\n", name);
+        printf("Writing pixels error (file - \"%s\").\n", name);
         fclose(new_file);
         return;
       }
     }
     int buff = 0;
     if (fwrite(&buff, 1, picture.bih.biWidth % 4, new_file) != picture.bih.biWidth % 4) {
-      printf("File writing error (file - \"%s\").\n", name);
+      printf("Writing padding error (file - \"%s\").\n", name);
       fclose(new_file);
       return;
     }
@@ -142,13 +144,13 @@ bmp_picture *readPicture(char *filename) {
     return NULL;
   }
   if (fread(&(new->bfh), sizeof(new->bfh), 1, file) != 1) {
-    printf("File reading error (file - \"%s\").\n", filename);
+    printf("Reading BITMAPFILEHEADER error (file - \"%s\").\n", filename);
     fclose(file);
     free(new);
     return NULL;
   }
   if (fread(&(new->bih), sizeof(new->bih), 1, file) != 1) {
-    printf("File reading error (file - \"%s\").\n", filename);
+    printf("Reading BITMAPINFOHEADER error (file - \"%s\").\n", filename);
     fclose(file);
     free(new);
     return NULL;
@@ -160,7 +162,7 @@ bmp_picture *readPicture(char *filename) {
   }
   for (int i = new->bih.biHeight - 1; i >= 0; i--) {
     if (fread(new->bitmap[i], sizeof(bmp_pixel), new->bih.biWidth, file) != new->bih.biWidth) {
-      printf("File reading error (file - \"%s\").\n", filename);
+      printf("Reading pixels error (file - \"%s\").\n", filename);
       fclose(file);
       freePicture(new->bitmap, new->bih.biHeight);
       free(new);
@@ -193,6 +195,13 @@ void NegativeFilter(bmp_picture picture) {
       setToNegative(&picture.bitmap[i][j]);
   return;
 }       
+
+void BlackWhiteFilter(bmp_picture picture) {
+  for (int i = 0; i < picture.bih.biHeight; i++)
+    for (int j = 0; j < picture.bih.biWidth; j++)
+      setToBlackAndWhite(&picture.bitmap[i][j]);
+  return;
+} 
 
 int cutIntoPieces(bmp_picture picture, uint32_t x_cut, uint32_t y_cut) {
   bmp_picture *cutted_pieces;

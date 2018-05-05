@@ -44,5 +44,8 @@ void colourFilter(bmp_picture picture, char *colour, uint8_t intensive);
 //Негатив
 void NegativeFilter(bmp_picture picture);
 
+//Чёрно-белый фильтр
+void BlackWhiteFilter(bmp_picture picture);
+
 //Деление картинки на части и запись частей в отдельные файлы (необходима доработка)
 int cutIntoPieces(bmp_picture picture, uint32_t x_cut, uint32_t y_cut);

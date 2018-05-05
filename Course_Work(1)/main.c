@@ -1,11 +1,12 @@
 #include "Interface.h"
 
-static const char *opt_string = "r:f:c:nh?";
+static const char *opt_string = "r:f:c:nbh?";
 static const struct option long_opts[] = {
   {"rewrite", required_argument, NULL, 'r'},
   {"filter", required_argument, NULL, 'f'},
   {"cut", required_argument, NULL, 'c'},
   {"negative", no_argument, NULL, 'n'},
+  {"blackwhite", no_argument, NULL, 'b'},
   {"help", no_argument, NULL, 'h'},
   {NULL, no_argument, NULL, 0}
 };
@@ -32,6 +33,9 @@ int main(int argc, char **argv) {
         inst.cutting_fs = optarg;
         break;
       case 'n':
+        inst.queue[count++] = opt;
+        break;
+      case 'b':
         inst.queue[count++] = opt;
         break;
       case 'h':
@@ -79,11 +83,15 @@ int main(int argc, char **argv) {
       case 'n':
         NegativeFilter(*picture);
         break;
+      case 'b':
+        BlackWhiteFilter(*picture);
+        break;
     }
   }
   if (strstr(inst.queue, "r") != NULL ||
       strstr(inst.queue, "f") != NULL ||
-      strstr(inst.queue, "n") != NULL)
+      strstr(inst.queue, "n") != NULL ||
+      strstr(inst.queue, "b") != NULL)
     writeIntoFile(*picture, "result.bmp");
   freePicture(picture->bitmap, picture->bih.biHeight);
   free(picture);

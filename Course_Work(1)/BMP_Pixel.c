@@ -51,3 +51,10 @@ void setToNegative(bmp_pixel *pixel) {
   pixel->green = 255 - pixel->green;
   pixel->red = 255 - pixel->red;
 }
+
+void setToBlackAndWhite(bmp_pixel *pixel) {
+  unsigned int black_white = (pixel->blue + pixel->green + pixel->red) / 3;
+  pixel->blue = black_white;
+  pixel->green = black_white;
+  pixel->red = black_white;
+}

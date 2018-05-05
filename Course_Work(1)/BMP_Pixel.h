@@ -23,3 +23,6 @@ void changeComponent(bmp_pixel *pixel, char *colour, uint8_t intensive);
 
 //Негатив-версия пикселя
 void setToNegative(bmp_pixel *pixel);
+
+//Чёрно-белая версия пикселя
+void setToBlackAndWhite(bmp_pixel *pixel);

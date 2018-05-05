@@ -24,11 +24,11 @@ int isCorrectFormat(char *string, char *reg_exp);
 //Справка
 void printHelpMessage();
 
-//Функция-интерфейс для переписывания пикселей
+//Функция-оболочка для переписывания пикселей
 int rewriteInterface(bmp_picture picture, configs inst);
 
-//Функция-интерфейс для фильтрации
+//Функция-оболочка для фильтрации
 int filterInterface(bmp_picture picture, configs inst);
 
-//Функция-интерфейс для деления на части
+//Функция-оболочка для деления на части
 int cutInterface(bmp_picture picture, configs inst);
