@@ -1,18 +1,20 @@
 #include "Interface.h"
 
-static const char *opt_string = "r:f:c:nbh?";
+static const char *opt_string = "r:f:c:nbih?";
 static const struct option long_opts[] = {
   {"rewrite", required_argument, NULL, 'r'},
   {"filter", required_argument, NULL, 'f'},
   {"cut", required_argument, NULL, 'c'},
+  {"name", required_argument, NULL, 1},
   {"negative", no_argument, NULL, 'n'},
   {"blackwhite", no_argument, NULL, 'b'},
+  {"info", no_argument, NULL, 'i'},
   {"help", no_argument, NULL, 'h'},
   {NULL, no_argument, NULL, 0}
 };
 
 int main(int argc, char **argv) {
-  configs inst = {NULL, NULL, NULL, NULL};
+  configs inst = {NULL, NULL, NULL, NULL, NULL};
   bmp_picture *picture;
   int opt, long_index = 0, count = 0;
 
@@ -32,10 +34,16 @@ int main(int argc, char **argv) {
         inst.queue[count++] = opt;
         inst.cutting_fs = optarg;
         break;
+      case 1:
+        inst.res_name = optarg;
+        break;
       case 'n':
         inst.queue[count++] = opt;
         break;
       case 'b':
+        inst.queue[count++] = opt;
+        break;
+      case 'i':
         inst.queue[count++] = opt;
         break;
       case 'h':
@@ -51,6 +59,13 @@ int main(int argc, char **argv) {
     return 0;
   }
   if (!(picture = readPicture(argv[argc - 1]))) {
+    free(inst.queue);
+    return 0;
+  }
+  if (strstr(inst.queue, "i") != NULL) {
+    printInfo(*picture, argv[argc - 1]);
+    freePicture(picture->bitmap, picture->bih.biHeight);
+    free(picture);
     free(inst.queue);
     return 0;
   }
@@ -92,7 +107,7 @@ int main(int argc, char **argv) {
       strstr(inst.queue, "f") != NULL ||
       strstr(inst.queue, "n") != NULL ||
       strstr(inst.queue, "b") != NULL)
-    writeIntoFile(*picture, "result.bmp");
+    writeIntoFile(*picture, inst.res_name);
   freePicture(picture->bitmap, picture->bih.biHeight);
   free(picture);
   free(inst.queue);

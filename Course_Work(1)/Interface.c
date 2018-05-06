@@ -23,16 +23,26 @@ void printHelpMessage() {
   printf("\033[1mFLAGS:\n\n");
   printf("\t\033[0m1) -r (--rewrite); argument format: \"x_y:r_g_b\" - change colour, which belongs to the pixel with coordinates (x, y) from\n"); 
   printf("\t                                                  the upper left corner, to the new one with red component 'r', green\n");
-  printf("\t                                                  component 'g' and blue component 'b' (each one from 0 to 255);\n");
+  printf("\t                                                  component 'g' and blue component 'b' (each one from 0 to 255);\n\n");
   printf("\t2) -f (--filter); argument format: \"comp:inten\" - change every pixel's component 'comp' ('red', 'blue' or 'green') to the new\n");
-  printf("\t                                                  value 'inten' (from 0 t0 255)\n");
+  printf("\t                                                  value 'inten' (from 0 t0 255)\n\n");
   printf("\t3) -c (--cut); argument format: \"x:y\" - cut picture into x * y pieces (x per picture width, y per picture height).\n");
-  printf("\t                                        Evevy piece goes to the new file with the name \"piece_#N.bmp\"\n");
-  printf("\t4) -n (--negative); no argument - Use negative filter to the picture.\n");
+  printf("\t                                        Evevy piece goes to the new file with the name \"piece_#N.bmp\"\n\n");
+  printf("\t4) -n (--negative); no argument - Use negative filter to the picture.\n\n");
   printf("\t5) -b (--blackwhite); no argument - Use black and white filter to the picture.\n\n");
+  printf("\t6) --name; need argument - Choose name for the file with changed picture (default - \"result.bmp\").\n\n");
+  printf("\t7) -i (--info); no argument - Show some information about the picture.\n\n");
   printf("\033[1mRemember!\033[0m The sequence of flags is important (first flag instruction will be done first).\n");
-  printf("Changed picture will be written into a new file named \"result.bmp\" (unless you only cut picture into pieces).\n");
-  printf("\033[1mAdvice\033[0m: It's better to use short versions of flags (no chances to catch segfault).\n");
+  printf("Changed picture will be written into a new file (unless you only cut picture into pieces).\n");
+  printf("When you choose a name for a new file, it's nessesary to use the format \"<filename>.bmp\".\n");
+}
+
+void printInfo(bmp_picture picture, char *name) {
+  printf("\033[1mINFORMATION ABOUT BMP-FILE\033[0m\n\n");
+  printf("\033[1mName\033[0m: %s\n", name);
+  printf("\033[1mSize\033[0m: %.2fK\n", (float) picture.bfh.bfSize / 1024);
+  printf("\033[1mWidth\033[0m: %u\n", picture.bih.biWidth);
+  printf("\033[1mHeight\033[0m: %u\n", picture.bih.biHeight);
 }
 
 int rewriteInterface(bmp_picture picture, configs inst) {
@@ -44,19 +54,19 @@ int rewriteInterface(bmp_picture picture, configs inst) {
     printf("Wrong argument format for rewriting (or you write invalid numbers, for example negative of fractional).\n");
     return 0;
   }
-  args[0] = atoi(strtok(inst.rewrite_fs, "-:"));
+  args[0] = atoi(strtok(inst.rewrite_fs, "_:"));
   for (int i = 1; i < 5; i++)
-    args[i] = atoi(strtok(NULL, "-:"));
+    args[i] = atoi(strtok(NULL, "_:"));
   for (int i = 0; i < 5; i++) {
     if (i < 2) {
       if (!isCorrectCoordinate(args[i], size[i])) {
-        printf("Incorrect coordinate: must be from 0 to %d.\n", size[i] - 1);
+        printf("Incorrect coordinate: must be not bigger than %d.\n", size[i] - 1);
         return 0;
       }
     }
     else {
       if (!isCorrectByte(args[i])) {
-        printf("Incorrect intensity: must be from 0 to 255.\n");
+        printf("Incorrect intensity: must be not bigger than 255.\n");
         return 0;
       }
     }
@@ -85,7 +95,7 @@ int filterInterface(bmp_picture picture, configs inst) {
     return 0;
   }
   if (!isCorrectByte(intensity)) {
-    printf("Incorrect intensity: must be from 0 to 255.\n");
+    printf("Incorrect intensity: must be not bigger than 255.\n");
     return 0;
   }
   colourFilter(picture, colour, (uint8_t) intensity);

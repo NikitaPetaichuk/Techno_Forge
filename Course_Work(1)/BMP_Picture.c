@@ -101,32 +101,35 @@ void copyPicturePiece(bmp_pixel **from, bmp_pixel **destination, uint32_t x_from
 
 void writeIntoFile(bmp_picture picture, char *name) {
   FILE *new_file;
+  char *file_name = name;
 
-  if (!(new_file = fopen(name, "wb+"))) {
-    printf("File opening error (file - \"%s\").\n", name);
+  if (!file_name)
+    file_name = "result.bmp";
+  if (!(new_file = fopen(file_name, "wb+"))) {
+    printf("File opening error (file - \"%s\").\n", file_name);
     return;
   }
   if (fwrite(&picture.bfh, sizeof(picture.bfh), 1, new_file) != 1) {
-    printf("Writing BITMAPFILEHEADER error (file - \"%s\").\n", name);
+    printf("Writing BITMAPFILEHEADER error (file - \"%s\").\n", file_name);
     fclose(new_file);
     return;
   }
   if (fwrite(&picture.bih, sizeof(picture.bih), 1, new_file) != 1) {
-    printf("Writing BITMAPINFOHEADER error (file - \"%s\").\n", name);
+    printf("Writing BITMAPINFOHEADER error (file - \"%s\").\n", file_name);
     fclose(new_file);
     return;
   }
   for (int i = picture.bih.biHeight - 1; i >= 0; i--) {
     for (int j = 0; j < picture.bih.biWidth; j++) {
       if (fwrite(&picture.bitmap[i][j], sizeof(bmp_pixel), 1, new_file) != 1) {
-        printf("Writing pixels error (file - \"%s\").\n", name);
+        printf("Writing pixels error (file - \"%s\").\n", file_name);
         fclose(new_file);
         return;
       }
     }
     int buff = 0;
     if (fwrite(&buff, 1, picture.bih.biWidth % 4, new_file) != picture.bih.biWidth % 4) {
-      printf("Writing padding error (file - \"%s\").\n", name);
+      printf("Writing padding error (file - \"%s\").\n", file_name);
       fclose(new_file);
       return;
     }

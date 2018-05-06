@@ -3,13 +3,14 @@
 #include <getopt.h>
 #include <regex.h>
 
-#define QUEUE_SIZE 10
+#define QUEUE_SIZE 15
 
 typedef struct Configs {
   char *queue;
   char *rewrite_fs;
   char *filter_fs;
   char *cutting_fs;
+  char *res_name;
 } configs;
 
 //Проверка на корректность бита
@@ -23,6 +24,9 @@ int isCorrectFormat(char *string, char *reg_exp);
 
 //Справка
 void printHelpMessage();
+
+//Информация о картинке
+void printInfo(bmp_picture picture, char *name);
 
 //Функция-оболочка для переписывания пикселей
 int rewriteInterface(bmp_picture picture, configs inst);

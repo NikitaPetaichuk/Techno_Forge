@@ -9,6 +9,7 @@ typedef struct tagBITMAPFILEHEADER {
     uint16_t bfReserved2;
     uint32_t bfOffBits;
 } BITMAPFILEHEADER;
+#pragma pack(pop)
 
 //Заголовочник №2
 #pragma pack(push, 2)
@@ -25,3 +26,4 @@ typedef struct tagBITMAPINFOHEADER {
     uint32_t biClrUsed;
     uint32_t biClrImportant;
 } BITMAPINFOHEADER;
+#pragma pack(pop)
