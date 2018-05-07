@@ -24,14 +24,13 @@ void printHelpMessage() {
   printf("\t\033[0m1) -r (--rewrite); argument format: \"x_y:r_g_b\" - change colour, which belongs to the pixel with coordinates (x, y) from\n"); 
   printf("\t                                                  the upper left corner, to the new one with red component 'r', green\n");
   printf("\t                                                  component 'g' and blue component 'b' (each one from 0 to 255);\n\n");
-  printf("\t2) -f (--filter); argument format: \"comp:inten\" - change every pixel's component 'comp' ('red', 'blue' or 'green') to the new\n");
+  printf("\t2) -f (--filter); argument format: \"comp:inten\" - change every pixel's component 'comp' (\"red\", \"blue\" or \"green\") to the new\n");
   printf("\t                                                  value 'inten' (from 0 t0 255)\n\n");
   printf("\t3) -c (--cut); argument format: \"x:y\" - cut picture into x * y pieces (x per picture width, y per picture height).\n");
   printf("\t                                        Evevy piece goes to the new file with the name \"piece_#N.bmp\"\n\n");
-  printf("\t4) -n (--negative); no argument - Use negative filter to the picture.\n\n");
-  printf("\t5) -b (--blackwhite); no argument - Use black and white filter to the picture.\n\n");
-  printf("\t6) --name; need argument - Choose name for the file with changed picture (default - \"result.bmp\").\n\n");
-  printf("\t7) -i (--info); no argument - Show some information about the picture.\n\n");
+  printf("\t4) -s (--standart); need argument - Use standart filter (\"negative\", \"blackwhite\" or \"sepia\") to the picture.\n\n");
+  printf("\t5) -n (--name); need argument - Choose name for the file with changed picture (default - \"result.bmp\").\n\n");
+  printf("\t6) -i (--info); no argument - Show some information about the picture.\n\n");
   printf("\033[1mRemember!\033[0m The sequence of flags is important (first flag instruction will be done first).\n");
   printf("Changed picture will be written into a new file (unless you only cut picture into pieces).\n");
   printf("When you choose a name for a new file, it's nessesary to use the format \"<filename>.bmp\".\n");
@@ -119,6 +118,24 @@ int cutInterface(bmp_picture picture, configs inst) {
     printf("Incorrect division: number of pixels is not enough for the such division.\n"); 
     return 0;
   }
-  cutIntoPieces(picture, (uint32_t) perX, (uint32_t) perY);
+  if (!cutIntoPieces(picture, (uint32_t) perX, (uint32_t) perY))
+    return 0;
+  return 1;
+}
+
+int stdFilterInterface(bmp_picture picture, configs inst) {
+  if (strcmp(inst.std_filter, "negative") == 0) {
+    NegativeFilter(picture);
+  }
+  else if (strcmp(inst.std_filter, "blackwhite") == 0) {
+    BlackWhiteFilter(picture);
+  }
+  else if (strcmp(inst.std_filter, "sepia") == 0) {
+    SepiaFilter(picture);
+  }
+  else {
+    printf("Unknown standart filter.\n");
+    return 0;
+  }
   return 1;
 }

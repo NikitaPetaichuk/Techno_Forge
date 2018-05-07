@@ -11,6 +11,7 @@ typedef struct Configs {
   char *filter_fs;
   char *cutting_fs;
   char *res_name;
+  char *std_filter;
 } configs;
 
 //Проверка на корректность бита
@@ -36,3 +37,6 @@ int filterInterface(bmp_picture picture, configs inst);
 
 //Функция-оболочка для деления на части
 int cutInterface(bmp_picture picture, configs inst);
+
+//Функция-оболочка для стандартных фильтров
+int stdFilterInterface(bmp_picture picture, configs inst);

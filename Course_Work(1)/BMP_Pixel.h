@@ -18,7 +18,7 @@ void rewritePixel(bmp_pixel* old, bmp_pixel* new);
 //Проверка идентичности пикселей
 int pixelsAreEqual(bmp_pixel one, bmp_pixel two);
 
-//Замена определённого бита
+//Замена определённого бита пикселя
 void changeComponent(bmp_pixel *pixel, char *colour, uint8_t intensive);
 
 //Негатив-версия пикселя
@@ -26,3 +26,6 @@ void setToNegative(bmp_pixel *pixel);
 
 //Чёрно-белая версия пикселя
 void setToBlackAndWhite(bmp_pixel *pixel);
+
+//Сепия-версия пикселя
+void setToSepia(bmp_pixel *pixel);

@@ -114,7 +114,7 @@ void writeIntoFile(bmp_picture picture, char *name) {
     fclose(new_file);
     return;
   }
-  if (fwrite(&picture.bih, sizeof(picture.bih), 1, new_file) != 1) {
+  if (fwrite(&picture.bih, picture.bih.biSize, 1, new_file) != 1) {
     printf("Writing BITMAPINFOHEADER error (file - \"%s\").\n", file_name);
     fclose(new_file);
     return;
@@ -152,7 +152,13 @@ bmp_picture *readPicture(char *filename) {
     free(new);
     return NULL;
   }
-  if (fread(&(new->bih), sizeof(new->bih), 1, file) != 1) {
+  if (fread(&(new->bih.biSize), sizeof(uint32_t), 1, file) != 1) {
+    printf("Reading BITMAPINFOHEADER size error (file - \"%s\").\n", filename);
+    fclose(file);
+    free(new);
+    return NULL;
+  }
+  if (fread(&(new->bih.biWidth), new->bih.biSize - sizeof(uint32_t), 1, file) != 1) {
     printf("Reading BITMAPINFOHEADER error (file - \"%s\").\n", filename);
     fclose(file);
     free(new);
@@ -203,6 +209,13 @@ void BlackWhiteFilter(bmp_picture picture) {
   for (int i = 0; i < picture.bih.biHeight; i++)
     for (int j = 0; j < picture.bih.biWidth; j++)
       setToBlackAndWhite(&picture.bitmap[i][j]);
+  return;
+}
+
+void SepiaFilter(bmp_picture picture) {
+  for (int i = 0; i < picture.bih.biHeight; i++)
+    for (int j = 0; j < picture.bih.biWidth; j++)
+      setToSepia(&picture.bitmap[i][j]);
   return;
 } 
 

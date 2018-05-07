@@ -1,13 +1,12 @@
 #include "Interface.h"
 
-static const char *opt_string = "r:f:c:nbih?";
+static const char *opt_string = "r:f:c:s:n:ih?";
 static const struct option long_opts[] = {
   {"rewrite", required_argument, NULL, 'r'},
   {"filter", required_argument, NULL, 'f'},
   {"cut", required_argument, NULL, 'c'},
-  {"name", required_argument, NULL, 1},
-  {"negative", no_argument, NULL, 'n'},
-  {"blackwhite", no_argument, NULL, 'b'},
+  {"standart", required_argument, NULL, 's'},
+  {"name", required_argument, NULL, 'n'},
   {"info", no_argument, NULL, 'i'},
   {"help", no_argument, NULL, 'h'},
   {NULL, no_argument, NULL, 0}
@@ -34,14 +33,12 @@ int main(int argc, char **argv) {
         inst.queue[count++] = opt;
         inst.cutting_fs = optarg;
         break;
-      case 1:
-        inst.res_name = optarg;
+      case 's':
+        inst.queue[count++] = opt;
+        inst.std_filter = optarg;
         break;
       case 'n':
-        inst.queue[count++] = opt;
-        break;
-      case 'b':
-        inst.queue[count++] = opt;
+        inst.res_name = optarg;
         break;
       case 'i':
         inst.queue[count++] = opt;
@@ -95,18 +92,19 @@ int main(int argc, char **argv) {
           return 0;
         }
         break;
-      case 'n':
-        NegativeFilter(*picture);
-        break;
-      case 'b':
-        BlackWhiteFilter(*picture);
+      case 's':
+        if (!stdFilterInterface(*picture, inst)) {
+          freePicture(picture->bitmap, picture->bih.biHeight);
+          free(picture);
+          free(inst.queue);
+          return 0;
+        }
         break;
     }
   }
   if (strstr(inst.queue, "r") != NULL ||
       strstr(inst.queue, "f") != NULL ||
-      strstr(inst.queue, "n") != NULL ||
-      strstr(inst.queue, "b") != NULL)
+      strstr(inst.queue, "s") != NULL)
     writeIntoFile(*picture, inst.res_name);
   freePicture(picture->bitmap, picture->bih.biHeight);
   free(picture);

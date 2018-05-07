@@ -58,3 +58,12 @@ void setToBlackAndWhite(bmp_pixel *pixel) {
   pixel->green = black_white;
   pixel->red = black_white;
 }
+
+void setToSepia(bmp_pixel *pixel) {
+  unsigned int new_red = (unsigned int)(0.393 * pixel->red + 0.769 * pixel->green + 0.189 * pixel->blue);
+  unsigned int new_green = (unsigned int)(0.349 * pixel->red + 0.686 * pixel->green + 0.168 * pixel->blue);
+  unsigned int new_blue = (unsigned int)(0.272 * pixel->red + 0.534 * pixel->green + 0.131 * pixel->blue);
+  pixel->red = (new_red <= 255) ? new_red : 255;
+  pixel->green = (new_green <= 255) ? new_green : 255;
+  pixel->blue = (new_blue <= 255) ? new_blue : 255;
+}

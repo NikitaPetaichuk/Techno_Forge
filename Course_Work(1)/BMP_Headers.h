@@ -25,5 +25,18 @@ typedef struct tagBITMAPINFOHEADER {
     uint32_t biYPelsPerMeter;
     uint32_t biClrUsed;
     uint32_t biClrImportant;
+    uint32_t biRedChBitmask;
+    uint32_t biGreenChBitmask;
+    uint32_t biBlueChBitmask;
+    uint32_t biAlphaChBitmask;
+    uint32_t biClrSpcType;
+    uint32_t biClrSpcEndpoints;
+    uint32_t biRedChGamma;
+    uint32_t biGreenChGamma;
+    uint32_t biBlueChGamma;
+    uint32_t biIntent;
+    uint32_t biICCProfData;
+    uint32_t biICCProfSize;
+    uint32_t Reserved;
 } BITMAPINFOHEADER;
 #pragma pack(pop)
