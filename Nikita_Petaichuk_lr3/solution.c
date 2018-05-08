@@ -88,8 +88,10 @@ int main() {
   goThroughDirs(START_DIR, &array, &count);
   qsort(array, count, sizeof(filedata), compFileData);
   output = fopen(RESULT_FILE, "w");
-  for (i = 0; i < count; i++)
+  for (i = 0; i < count; i++) {
     fwrite(array[i].string, sizeof(char), strlen(array[i].string), output);
+    fwrite("\n", sizeof(char), 1, output);
+  }
   fclose(output);
   free(array);
   return 0;
